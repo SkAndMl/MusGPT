@@ -1,0 +1,15 @@
+{
+    "batch_size": 64,
+    "block_size" : 256,
+    "context_length" : 512,
+    "d_model" : 384,
+    "dropout" : 0.2,
+    "eval_interval" : 500,
+    "eval_iters" : 200,
+    "head_dim" : 64,
+    "learning_rate" : 3e-4,
+    "n_decoders" : 6,
+    "n_encoders" : 6,
+    "n_heads" : 6,
+    "train_iters" : 5000
+}
