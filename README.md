@@ -28,3 +28,9 @@ Trimply titaved ps, ge
 Fingeivedy, bequbupe, po.
 Trhokeringe at bous ot: bys; wined iooualy; on
 ```
+
+https://github.com/SkAndMl/MusGPT/assets/86184014/fa5fc4dd-f414-4022-b216-bf3270d4ec95
+
+
+
+
