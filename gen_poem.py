@@ -3,6 +3,7 @@ import json
 import time
 import argparse
 from model import PoemGPT
+from make_pdf import make_pdf
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 with open("./config/poem_gpt_config.json") as f:
@@ -32,7 +33,10 @@ def print_like_gpt(text):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num_tokens", required=True, metavar="", type=int)
+    parser.add_argument("-t", "--title", required=False, metavar="", type=str, default="sample")
     args = parser.parse_args()
+    title = args.title
     out = poem_gpt.generate(max_new_tokens=args.num_tokens) # [1, S]
     text = decode(out[0].cpu().numpy())[1:]
     print_like_gpt(text=text)
+    make_pdf(path=f"{title}.pdf", poet="Sathya", text=text)
