@@ -4,6 +4,9 @@ import torch
 from model import PoemGPT
 from make_pdf import make_pdf
 
+import gtts
+from io import BytesIO
+
 from typing import Tuple, Dict
 import json
 
@@ -37,22 +40,40 @@ def type_output(content: str, delay = 0.03):
 
 def main():
     st.set_page_config(
-        page_title="PoemGPT",
+        page_title="Poetika",
         page_icon="✒️"
     )
 
-    st.header("PoemGPT✒️")
+    st.header("Poetika")
 
     options = ["Shakespeare", "Wordsworth"]
 
-    poet = st.radio(label="**Select your poet** :lower_left_paintbrush:",
+    poet = st.radio(label="**Select your poet** ✒️",
                 horizontal=True,
                 options=options)
+    
+    st.session_state.disabled = False
+    input_txt = st.text_input(label="Context for the poem",
+                            value="", max_chars=200,
+                            key="context",
+                            placeholder="You can type the start of the poem",
+                            disabled=st.session_state.disabled)
+    
     generate = st.button(label="Generate")
     if generate:
         model, encode, decode = load_model(poet=poet.lower())
-        out = model.generate() # [1, S]
-        text = decode(out[0].cpu().numpy())[1:]
+        if len(input_txt) > 0:
+            context = torch.tensor([encode(input_txt)],
+                                   dtype=torch.long,
+                                   device=device)
+        else:
+            context = torch.zeros(size=(1,1),
+                                  dtype=torch.long,
+                                  device=device)
+        
+        st.session_state.disabled=True
+        out = model.generate(x=context) # [1, S]
+        text = decode(out[0].cpu().numpy())
         type_output(text)
     
         pdf = make_pdf(poet=poet, text=text)
@@ -62,7 +83,13 @@ def main():
             file_name="gen.pdf",
             mime="application/pdf"
         )
-            
+
+        
+        sound_file = BytesIO()
+        tts = gtts.gTTS(text, lang='en')
+        tts.write_to_fp(sound_file)
+        st.audio(sound_file)
+        
 
 if __name__=="__main__":
     main()
