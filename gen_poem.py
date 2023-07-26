@@ -8,7 +8,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 with open("./config/poem_gpt_config.json") as f:
     config = json.load(f)
 
-with open("./data/input.txt", "r", encoding="utf=8") as f:
+with open("./data/shakespeare.txt", "r", encoding="utf=8") as f:
     data = f.read()
     chars = sorted(list(set(data)))
     vocab_size = len(chars)
@@ -18,7 +18,7 @@ decode = lambda l: "".join([itos[i] for i in l])
 
 poem_gpt = PoemGPT(config=config,
                    vocab_size=vocab_size)
-poem_gpt.load_state_dict(torch.load("./weights/poem_gpt_weights.pt",
+poem_gpt.load_state_dict(torch.load("./weights/shakespeare.pt",
                                     map_location=torch.device(device=device)))
 
 
