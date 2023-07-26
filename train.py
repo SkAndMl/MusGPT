@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-import numpy as np
-import random
 from typing import Tuple, Dict
 import json
 
