@@ -44,8 +44,16 @@ def main():
         page_icon="✒️"
     )
 
-    st.header("Poetika")
+    hide_default_format = """
+       <style>
+       #MainMenu {visibility: hidden; }
+       footer{visibility: hidden;}
+       </style>
+       """
+    st.markdown(hide_default_format, unsafe_allow_html=True)
 
+    st.header("Poetika")
+    st.markdown("A poem by [Poet K](https://www.linkedin.com/in/sathya-krishnan-suresh-914763217/)")
     options = ["Shakespeare", "Wordsworth"]
 
     poet = st.radio(label="**Select your poet** ✒️",
@@ -90,6 +98,7 @@ def main():
         tts.write_to_fp(sound_file)
         st.audio(sound_file)
         
+    
 
 if __name__=="__main__":
     main()

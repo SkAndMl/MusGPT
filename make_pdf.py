@@ -6,7 +6,7 @@ class PDF(FPDF):
 
         self.image("quill.jpeg", 10, 8, 25)
         self.set_font("helvetica", "B", 20)
-        self.cell(0, 10, "PoemGPT", border=False, align='C')
+        self.cell(0, 10, "Poetika", border=False, align='C')
         self.ln(20)
 
     def footer(self):
