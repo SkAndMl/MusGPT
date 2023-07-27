@@ -80,7 +80,9 @@ def main():
                                   device=device)
         
         st.session_state.disabled=True
+        st.toast(f"{poet} is thinking...", icon="💭")
         out = model.generate(x=context) # [1, S]
+        st.toast(f"{poet} is writing...", icon="✒️")
         text = decode(out[0].cpu().numpy())
         type_output(text)
     
