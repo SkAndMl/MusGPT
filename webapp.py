@@ -51,55 +51,59 @@ def main():
        </style>
        """
     st.markdown(hide_default_format, unsafe_allow_html=True)
-
-    st.header("Poetika")
-    st.markdown("A poem by [Poet K](https://www.linkedin.com/in/sathya-krishnan-suresh-914763217/)")
-    options = ["Shakespeare", "Wordsworth"]
-
-    poet = st.radio(label="**Select your poet** ✒️",
-                horizontal=True,
-                options=options)
     
-    st.session_state.disabled = False
-    input_txt = st.text_input(label="Context for the poem",
-                            value="", max_chars=200,
-                            key="context",
-                            placeholder="You can type the start of the poem",
-                            disabled=st.session_state.disabled)
-    char_len = st.slider(label="Length of the poem", min_value=200, max_value=700, value=350,
-                         step=5)
-    generate = st.button(label="Generate")
-    if generate:
-        model, encode, decode = load_model(poet=poet.lower())
-        if len(input_txt) > 0:
-            context = torch.tensor([encode(input_txt)],
-                                   dtype=torch.long,
-                                   device=device)
-        else:
-            context = torch.zeros(size=(1,1),
-                                  dtype=torch.long,
-                                  device=device)
+    col1, col2 = st.columns([0.6, 0.4], gap="large")
+    with col1:
+        st.header("Poetika")
+        # st.markdown("A poem by [Poet K](https://www.linkedin.com/in/sathya-krishnan-suresh-914763217/)")
+        options = ["Shakespeare", "Wordsworth"]
+        poet = st.radio(label="**Select your poet** ✒️",
+                    horizontal=True,
+                    options=options)
         
-        st.session_state.disabled=True
-        st.toast(f"{poet} is thinking...", icon="💭")
-        out = model.generate(x=context, max_new_tokens=char_len) # [1, S]
-        st.toast(f"{poet} is writing...", icon="✒️")
-        text = decode(out[0].cpu().numpy())
-        type_output(text)
+        st.session_state.disabled = False
+        input_txt = st.text_input(label="Context for the poem",
+                                value="", max_chars=200,
+                                key="context",
+                                placeholder="You can type the start of the poem",
+                                disabled=st.session_state.disabled)
+        char_len = st.slider(label="Length of the poem", min_value=200, max_value=700, value=350,
+                            step=5)
+        generate = st.button(label="Generate")
     
-        pdf = make_pdf(poet=poet, text=text)
-        btn = st.download_button(
-            label="Download as PDF",
-            data=bytes(pdf.output()),
-            file_name="gen.pdf",
-            mime="application/pdf"
-        )
-
+    with col2:
+        st.header("The Jam Zone")
+        if generate:
+            model, encode, decode = load_model(poet=poet.lower())
+            if len(input_txt) > 0:
+                context = torch.tensor([encode(input_txt)],
+                                    dtype=torch.long,
+                                    device=device)
+            else:
+                context = torch.zeros(size=(1,1),
+                                    dtype=torch.long,
+                                    device=device)
+            
+            st.session_state.disabled=True
+            st.toast(f"{poet} is thinking...", icon="💭")
+            out = model.generate(x=context, max_new_tokens=char_len) # [1, S]
+            st.toast(f"{poet} is writing...", icon="✒️")
+            text = decode(out[0].cpu().numpy())
+            type_output(text)
         
-        sound_file = BytesIO()
-        tts = gtts.gTTS(text, lang='en')
-        tts.write_to_fp(sound_file)
-        st.audio(sound_file)
+            pdf = make_pdf(poet=poet, text=text)
+            btn = st.download_button(
+                label="Download as PDF",
+                data=bytes(pdf.output()),
+                file_name="gen.pdf",
+                mime="application/pdf"
+            )
+
+            
+            sound_file = BytesIO()
+            tts = gtts.gTTS(text, lang='en')
+            tts.write_to_fp(sound_file)
+            st.audio(sound_file)
         
     
 
