@@ -66,7 +66,8 @@ def main():
                             key="context",
                             placeholder="You can type the start of the poem",
                             disabled=st.session_state.disabled)
-    
+    char_len = st.slider(label="Length of the poem", min_value=200, max_value=700, value=350,
+                         step=5)
     generate = st.button(label="Generate")
     if generate:
         model, encode, decode = load_model(poet=poet.lower())
@@ -81,7 +82,7 @@ def main():
         
         st.session_state.disabled=True
         st.toast(f"{poet} is thinking...", icon="💭")
-        out = model.generate(x=context) # [1, S]
+        out = model.generate(x=context, max_new_tokens=char_len) # [1, S]
         st.toast(f"{poet} is writing...", icon="✒️")
         text = decode(out[0].cpu().numpy())
         type_output(text)
