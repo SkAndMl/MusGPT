@@ -38,6 +38,12 @@ def type_output(content: str, delay = 0.03):
         placeholder.markdown(intermediate)
         time.sleep(delay)
 
+def convert_text_to_audio(text: str) -> BytesIO:
+    sound_file = BytesIO()
+    tts = gtts.gTTS(text, lang='en')
+    tts.write_to_fp(sound_file)
+    return sound_file
+
 def main():
     st.set_page_config(
         page_title="Poetika",
@@ -100,10 +106,7 @@ def main():
             )
 
             
-            sound_file = BytesIO()
-            tts = gtts.gTTS(text, lang='en')
-            tts.write_to_fp(sound_file)
-            st.audio(sound_file)
+            st.audio(convert_text_to_audio(text=text))
         
     
 
