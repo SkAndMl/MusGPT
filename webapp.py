@@ -63,9 +63,8 @@ def main():
         st.header("Poetika")
         # st.markdown("A poem by [Poet K](https://www.linkedin.com/in/sathya-krishnan-suresh-914763217/)")
         options = ["Shakespeare", "Wordsworth"]
-        poet = st.radio(label="**Select your poet** ✒️",
-                    horizontal=True,
-                    options=options)
+        poet = st.selectbox(label="**Select your poet** ✒️", 
+                            options=["Shakespeare", "Wordsworth"])
         
         st.session_state.disabled = False
         input_txt = st.text_input(label="Context for the poem",
