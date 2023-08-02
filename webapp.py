@@ -13,6 +13,7 @@ import json
 if "poem" not in st.session_state:
     st.session_state.poem = ""
     st.session_state.continue_gen = False
+    st.session_state.disable_context = False
 
 def clear_states():
     st.session_state.poem = ""
@@ -79,9 +80,9 @@ def main():
                                 value="", max_chars=200,
                                 key="context",
                                 placeholder="You can type the start of the poem",
-                                disabled=st.session_state.disabled)
+                                disabled=st.session_state.disable_context)
         char_len = st.slider(label="Length of the poem", min_value=200, max_value=700, value=350,
-                            step=5)
+                            step=5, disabled=st.session_state.disable_context)
         placeholder = st.empty()
         generate = None
         if not st.session_state.continue_gen:
@@ -139,6 +140,7 @@ def main():
             
             if not st.session_state.continue_gen:
                 st.session_state.continue_gen = True
+                st.session_state.disable_context = True
             generate = placeholder.button("Continue generation?",
                                           key="cont_key_2")
     
