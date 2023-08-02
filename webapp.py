@@ -10,6 +10,16 @@ from io import BytesIO
 from typing import Tuple, Dict
 import json
 
+if "poem" not in st.session_state:
+    st.session_state.poem = ""
+    st.session_state.continue_gen = False
+
+def clear_states():
+    st.session_state.poem = ""
+    st.session_state.continue_gen = False
+    # exit()
+
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 with open("./config/poem_gpt_config.json", "r") as f:
         config = json.load(f)
@@ -32,10 +42,9 @@ def load_model(poet):
 def type_output(content: str, delay = 0.03):
     placeholder = st.empty()
     content = content.replace("\n", "  \n")
-    intermediate = ""
     for letter in content:
-        intermediate += letter
-        placeholder.markdown(intermediate)
+        st.session_state["poem"] += letter
+        placeholder.markdown(st.session_state["poem"])
         time.sleep(delay)
 
 def convert_text_to_audio(text: str) -> BytesIO:
@@ -61,10 +70,9 @@ def main():
     col1, col2 = st.columns([0.6, 0.4], gap="large")
     with col1:
         st.header("Poetika")
-        # st.markdown("A poem by [Poet K](https://www.linkedin.com/in/sathya-krishnan-suresh-914763217/)")
-        options = ["Shakespeare", "Wordsworth"]
         poet = st.selectbox(label="**Select your poet** ✒️", 
-                            options=["Shakespeare", "Wordsworth"])
+                            options=["Shakespeare", "Wordsworth"],
+                            on_change=clear_states)
         
         st.session_state.disabled = False
         input_txt = st.text_input(label="Context for the poem",
@@ -74,39 +82,65 @@ def main():
                                 disabled=st.session_state.disabled)
         char_len = st.slider(label="Length of the poem", min_value=200, max_value=700, value=350,
                             step=5)
-        generate = st.button(label="Generate")
+        placeholder = st.empty()
+        generate = None
+        if not st.session_state.continue_gen:
+            generate = placeholder.button("Generate")
+        else:
+            generate = placeholder.button(label="Continue generation?",
+                                          key="cont_key_1")
     
     with col2:
         st.header("The Jam Zone")
-        if generate:
+        if generate or st.session_state.continue_gen:
             model, encode, decode = load_model(poet=poet.lower())
-            if len(input_txt) > 0:
-                context = torch.tensor([encode(input_txt)],
-                                    dtype=torch.long,
-                                    device=device)
-            else:
-                context = torch.zeros(size=(1,1),
-                                    dtype=torch.long,
-                                    device=device)
             
-            st.session_state.disabled=True
+            if not st.session_state.continue_gen:
+                if len(input_txt) > 0:
+                    context = torch.tensor([encode(input_txt)],
+                                        dtype=torch.long,
+                                        device=device)
+                else:
+                    context = torch.zeros(size=(1,1),
+                                        dtype=torch.long,
+                                        device=device)
+            else:
+                last_gen_poem = st.session_state.poem[-char_len:]
+                print(last_gen_poem)
+                context = encode(last_gen_poem)
+                context = torch.tensor([context],
+                                       dtype=torch.long,
+                                       device=device)
+            
+
             st.toast(f"{poet} is thinking...", icon="💭")
             out = model.generate(x=context, max_new_tokens=char_len) # [1, S]
             st.toast(f"{poet} is writing...", icon="✒️")
-            text = decode(out[0].cpu().numpy())
+            text = ""
+            if not st.session_state.continue_gen:
+                text = decode(out[0].cpu().numpy())
+            else:
+                text = decode(out[0].cpu().numpy()[char_len:])
             type_output(text)
-        
-            pdf = make_pdf(poet=poet, text=text)
+
+            
+
+            pdf = make_pdf(poet=poet, text=st.session_state["poem"])
             btn = st.download_button(
                 label="Download as PDF",
                 data=bytes(pdf.output()),
                 file_name="gen.pdf",
-                mime="application/pdf"
+                mime="application/pdf",
+                on_click=clear_states
             )
-
             
-            st.audio(convert_text_to_audio(text=text))
-        
+            st.toast(f"Generating audio for the poem...", icon="🎤")
+            st.audio(convert_text_to_audio(text=st.session_state["poem"]))
+            
+            if not st.session_state.continue_gen:
+                st.session_state.continue_gen = True
+            generate = placeholder.button("Continue generation?",
+                                          key="cont_key_2")
     
 
 if __name__=="__main__":
